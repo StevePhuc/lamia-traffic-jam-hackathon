@@ -1,7 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { Map, Marker, Popup, TileLayer } from "react-leaflet";
-
 import L from "leaflet";
+
+let request = require("request-promise-native");
+async function getTripId(routeId, realtimeDirectionId, departureDate, departureTime) {
+    const routingDirectionId = realtimeDirectionId - 1;
+
+    const [hours, minutes] = departureTime.split(":");
+    const departureSeconds = hours * 3600 + minutes * 60;
+
+    const query = `
+        {
+        fuzzyTrip(route: "HSL:${routeId}", direction: ${routingDirectionId}, date: "${departureDate}", time: ${departureSeconds}) {
+            gtfsId
+        }
+        }
+        `;
+
+    const response = await request.post(
+        "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql",
+        {
+            body: {
+                query
+            },
+            json: true,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+    );
+
+    console.log(response);
+
+    const trip = response.data.fuzzyTrip;
+
+    return trip ? trip.gtfsId : null;
+}
+
 let trams = [];
 let mqtt = require("mqtt");
 let client = mqtt.connect("wss://mqtt.hsl.fi:443/");
@@ -18,7 +53,7 @@ client.subscribe("/hfp/v2/journey/ongoing/vp/tram/+/+/+/+/#", { qos: 1 }, functi
     }
 });
 
-client.on("message", function(topic, message) {
+client.on("message", async function(topic, message) {
     const data = JSON.parse(message);
     // console.log(data.VP);
     const { desi, veh, lat, long } = data.VP;
@@ -29,6 +64,12 @@ client.on("message", function(topic, message) {
     //
     if (!existTram) {
         trams = [...trams, { desi, veh, lat, long }];
+        const { VP } = data;
+        console.log(VP);
+
+        const tripId = await getTripId(VP.route, VP.dir, VP.oday, VP.start);
+        console.log("tripId", tripId);
+        // console.log(data.VP);
     } else {
         if (!lat || !long) {
             return;
