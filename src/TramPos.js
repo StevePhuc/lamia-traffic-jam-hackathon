@@ -18,19 +18,14 @@ client.subscribe("/hfp/v2/journey/ongoing/vp/tram/+/+/1007/+/#", { qos: 1 }, fun
     }
 });
 
-function TramPos({ setTramPos }) {
-    // const [longitude, setLongitude] = useState("");
-    // const [latitude, setLatitude] = useState("");
-    useEffect(() => {
-        client.on("message", function(topic, message) {
-            const data = JSON.parse(message);
-            console.log(data.VP.veh);
-
-            // const { lat, long } = data.VP;
-            // console.log(lat, long);
-            // setTramPos([lat, long]);
-        });
-    }, []);
+function TramPos({ checkTram }) {
+    // useEffect(() => {
+    client.on("message", function(topic, message) {
+        const data = JSON.parse(message);
+        // console.log(data.VP);
+        checkTram(data.VP);
+    });
+    // }, []);
 
     return <></>;
 }

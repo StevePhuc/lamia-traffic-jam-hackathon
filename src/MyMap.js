@@ -3,7 +3,7 @@ import { Map, Marker, Popup, TileLayer } from "react-leaflet";
 
 import L from "leaflet";
 // import TramPos from "./TramPos";
-
+let trams = [];
 let mqtt = require("mqtt");
 let client = mqtt.connect("wss://mqtt.hsl.fi:443/");
 /*client on connect */
@@ -22,17 +22,39 @@ client.subscribe("/hfp/v2/journey/ongoing/vp/tram/+/+/1007/+/#", { qos: 1 }, fun
     }
 });
 
+client.on("message", function(topic, message) {
+    const data = JSON.parse(message);
+    // console.log(data.VP);
+    const { veh, lat, long } = data.VP;
+    // console.log("veh:", veh, "lat:", lat, "long:", long);
+    const existTram = trams.find(tram => {
+        return tram.veh === veh;
+    });
+    //
+    if (!existTram) {
+        // console.log("add tram", veh);
+        trams = [...trams, { veh, lat, long }];
+    } else {
+        if (!lat || !long) {
+            return;
+        }
+        trams = trams.map(tram => (tram.veh == veh ? { veh, lat, long } : tram));
+        // console.log("trams", trams[4]);
+    }
+    //
+});
+
 export default () => {
     const map = {
         lat: 60.169282,
         lng: 24.939191,
-        zoom: 13,
+        zoom: 14,
         number: 1
     };
 
     const position = [map.lat, map.lng];
 
-    // const [trams, setTrams] = useState([]);
+    const [tramsArray, setTramsArray] = useState([]);
     // const [trams, setTrams] = useState([]);
 
     // const [tramPos, setTramPos] = useState([60.152442, 24.918126]);
@@ -45,33 +67,15 @@ export default () => {
         shadowUrl: null,
         shadowSize: null,
         shadowAnchor: null,
-        iconSize: new L.Point(40, 40),
+        iconSize: new L.Point(30, 30),
         className: tramColor
     });
 
-    const checkTram = () => {
-        let tramsArray = [];
-        client.on("message", function(topic, message) {
-            const data = JSON.parse(message);
-            // console.log(data.VP);
-            const { veh, lat, long } = data.VP;
-            // console.log("veh:", veh, "lat:", lat, "long:", long);
-            const existTram = trams.find(tram => {
-                return tram.veh === veh;
-            });
-            console.log(trams);
-            if (!existTram) {
-                console.log("add tram", veh);
-                trams = [...trams, { veh, lat, long }];
-                // setTrams([...trams, { veh, lat, long }]);
-            } else {
-                trams.map(tram => (tram.veh == veh ? { veh, lat, long } : tram));
-            }
-            //
-        });
-    };
     useEffect(() => {
-        checkTram();
+        setInterval(() => {
+            console.log(trams);
+            setTramsArray(trams);
+        }, 1000);
     }, []);
     // useEffect(() => {
     //     const url =
@@ -96,14 +100,15 @@ export default () => {
     return (
         <>
             {/* <TramPos checkTram={checkTram} /> */}
-            <Map style={{ height: "70vh" }} center={position} zoom={map.zoom}>
+            <Map style={{ height: "70vh" }} center={position} zoom={map.zoom} zoomControl={false}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                {/* {trams.map(tram => {
-                    return <Marker position={tram.number} icon={iconTram}></Marker>;
-                })} */}
+                {tramsArray.map(tram => {
+                    const tramPosition = [tram.lat, tram.long];
+                    return <Marker key={tram.veh} position={tramPosition} icon={iconTram}></Marker>;
+                })}
             </Map>
         </>
     );
