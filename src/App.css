@@ -9,3 +9,56 @@
 .icon-yellow {
     background: rgb(236, 202, 8);
 }
+
+.my-div-icon {
+    width: 25px !important;
+    height: 25px !important;
+    background: green;
+    border: 2px dotted black;
+    opacity: 0.8;
+}
+
+.route::after {
+    /* background: blue; */
+    color: white;
+    font-size: 20px;
+    padding-left: 7px;
+}
+
+.desi-1::after {
+    content: "1";
+}
+.desi-2::after {
+    content: "2";
+}
+.desi-3::after {
+    content: "3";
+}
+.desi-4::after {
+    content: "4";
+}
+.desi-5::after {
+    content: "5";
+}
+.desi-6::after {
+    content: "6";
+}
+.desi-7::after {
+    content: "7";
+}
+.desi-7H::after {
+    content: "7H";
+    padding-left: 1px;
+}
+.desi-8::after {
+    content: "8";
+}
+.desi-9::after {
+    content: "9";
+}
+.desi-10::after {
+    content: "10";
+}
+.desi-10H::after {
+    content: "10H";
+}
