@@ -1,5 +1,6 @@
 import React from "react";
 import MyMap from "./MyMap";
+import TramPos from "./TramPos";
 import "./App.css";
 
 function App() {

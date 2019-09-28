@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Map, Marker, Popup, TileLayer } from "react-leaflet";
 
 import L from "leaflet";
+import TramPos from "./TramPos";
 
 export default () => {
     const map = {
@@ -48,16 +49,19 @@ export default () => {
     }, []);
 
     return (
-        <Map style={{ height: "70vh" }} center={position} zoom={map.zoom}>
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Marker position={tramPos} icon={iconTram}>
-                <Popup>
-                    A pretty CSS3 popup. <br /> Easily customizable.
-                </Popup>
-            </Marker>
-        </Map>
+        <>
+            <TramPos setTramPos={setTramPos} />
+            <Map style={{ height: "70vh" }} center={position} zoom={map.zoom}>
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={tramPos} icon={iconTram}>
+                    <Popup>
+                        A pretty CSS3 popup. <br /> Easily customizable.
+                    </Popup>
+                </Marker>
+            </Map>
+        </>
     );
 };
