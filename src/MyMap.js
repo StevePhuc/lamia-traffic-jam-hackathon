@@ -1,55 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
 import { Map, Marker, Popup, TileLayer } from "react-leaflet";
 
-export default class SimpleExample extends React.Component {
-    state = {
-        lat: 51.505,
-        lng: -0.09,
-        zoom: 13
+import L from "leaflet";
+
+const iconPerson = new L.Icon({
+    iconUrl: require("./img/number7.svg"),
+    iconAnchor: null,
+    popupAnchor: null,
+    shadowUrl: null,
+    shadowSize: null,
+    shadowAnchor: null,
+    iconSize: new L.Point(40, 40),
+    className: "icon-green"
+});
+
+export default () => {
+    const map = {
+        lat: 60.152442,
+        lng: 24.918126,
+        zoom: 14,
+        number: 1
     };
 
-    render() {
-        const position = [this.state.lat, this.state.lng];
-        return (
-            <Map center={position} zoom={this.state.zoom}>
-                <TileLayer
-                    attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker position={position}>
-                    <Popup>
-                        A pretty CSS3 popup. <br /> Easily customizable.
-                    </Popup>
-                </Marker>
-            </Map>
-        );
-    }
-}
+    const position = [map.lat, map.lng];
 
-// export default class SimpleExample extends React.Component {
-//     constructor() {
-//         super();
-//         this.state = {
-//             lat: 51.505,
-//             lng: -0.09,
-//             zoom: 13
-//         };
-//     }
+    const [tram, setTram] = useState([60.152442, 24.918126]);
 
-//     render() {
-//         const position = [this.state.lat, this.state.lng];
-//         return (
-//             <Map center={position} zoom={this.state.zoom}>
-//                 <TileLayer
-//                     attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-//                     url="https://{s}.tile.osm.org/{z}/{x}/{y}.png"
-//                 />
-//                 <Marker position={position}>
-//                     <Popup>
-//                         A pretty CSS3 popup. <br /> Easily customizable.
-//                     </Popup>
-//                 </Marker>
-//             </Map>
-//         );
-//     }
-// }
+    return (
+        <Map style={{ height: "70vh" }} center={position} zoom={map.zoom}>
+            <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={tram} icon={iconPerson}>
+                <Popup>
+                    A pretty CSS3 popup. <br /> Easily customizable.
+                </Popup>
+            </Marker>
+        </Map>
+    );
+};
