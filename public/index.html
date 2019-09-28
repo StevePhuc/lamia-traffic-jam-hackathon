@@ -77,8 +77,6 @@
                 // Always set the view to current lat lon and zoom!
                 mymap.setView([latitude, longitude], mymap.getZoom());
                 marker.setLatLng([latitude, longitude]);
-                document.getElementById("lat").textContent = latitude.toFixed(2);
-                document.getElementById("lon").textContent = longitude.toFixed(2);
             }
             getISS();
             setInterval(getISS, 5000);

@@ -4,7 +4,7 @@ import React from "react";
 // import { Map, Marker, Popup, TileLayer } from "react-leaflet";
 
 function App() {
-    const position = [51.505, -0.09];
+    // const position = [51.505, -0.09];
     return (
         <div className="App">
             <header className="App-header"></header>
