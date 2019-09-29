@@ -13,52 +13,55 @@
 .my-div-icon {
     width: 25px !important;
     height: 25px !important;
-    background: green;
     border: 2px dotted black;
     opacity: 0.8;
+    border-radius: 50%;
 }
 
-.route::after {
+.route::before {
     /* background: blue; */
     color: white;
-    font-size: 20px;
+    font-size: 18px;
     padding-left: 7px;
 }
 
-.desi-1::after {
+.desi-1::before {
     content: "1";
 }
-.desi-2::after {
+.desi-2::before {
     content: "2";
 }
-.desi-3::after {
+.desi-3::before {
     content: "3";
 }
-.desi-4::after {
+.desi-4::before {
     content: "4";
 }
-.desi-5::after {
+.desi-5::before {
     content: "5";
 }
-.desi-6::after {
+.desi-6::before {
     content: "6";
 }
-.desi-7::after {
+.desi-7::before {
     content: "7";
 }
-.desi-7H::after {
+.desi-7H::before {
     content: "7H";
     padding-left: 1px;
+    font-size: 16px;
 }
-.desi-8::after {
+.desi-8::before {
     content: "8";
 }
-.desi-9::after {
+.desi-9::before {
     content: "9";
 }
-.desi-10::after {
+.desi-10::before {
     content: "10";
+    padding-left: 1px;
+    font-size: 16px;
 }
-.desi-10H::after {
+.desi-10H::before {
     content: "10H";
 }

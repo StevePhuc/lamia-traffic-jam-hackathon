@@ -30,9 +30,9 @@ async function getTripId(routeId, realtimeDirectionId, departureDate, departureT
         }
     );
 
-    console.log(response);
-
     const trip = response.data.fuzzyTrip;
+    // console.log("response", response);
+    // console.log("trip", trip);
 
     return trip ? trip.gtfsId : null;
 }
@@ -62,22 +62,60 @@ client.on("message", async function(topic, message) {
         return tram.veh === veh;
     });
     //
+    if (!lat || !long) {
+        return;
+    }
     if (!existTram) {
         trams = [...trams, { desi, veh, lat, long }];
         const { VP } = data;
-        console.log(VP);
+        // console.log("veh", veh, ": ", VP);
 
         const tripId = await getTripId(VP.route, VP.dir, VP.oday, VP.start);
-        console.log("tripId", tripId);
+
+        if (tripId) {
+            console.log("veh", veh, ": ", "tripId", tripId);
+            trams = trams.map(tram => (tram.veh == veh ? { ...tram, tripId } : tram));
+        } else {
+            console.log("trip Null VP:", VP);
+        }
+
         // console.log(data.VP);
     } else {
-        if (!lat || !long) {
-            return;
-        }
-        trams = trams.map(tram => (tram.veh == veh ? { desi, veh, lat, long } : tram));
+        trams = trams.map(tram => (tram.veh == veh ? { ...tram, desi, veh, lat, long } : tram));
     }
     //
 });
+
+const refreshCongestion = () => {
+    console.log("check Congestion");
+    // console.log(trams);
+    trams.forEach(tram => {
+        if (tram.tripId) {
+            checkCongestion(tram.veh, tram.tripId);
+        }
+    });
+};
+
+const checkCongestion = async (veh, tripId) => {
+    const url = `https://hsl-tram-congestion.appspot.com/trips/${tripId}/congestionRate`;
+    // `https://hsl-tram-congestion.appspot.com/trips/HSL:1007_20190820_Ti_2_2101/congestionRate`;
+    const result = await fetch(url);
+    const data = await result.text();
+    const congestionRate = parseFloat(data);
+    // console.log(veh, ": ", congestionRate);
+    if (congestionRate > 1) {
+        // setTramColor("icon-red");
+        changeTrams(veh, { congestionRate, color: "icon-red" });
+    } else if (congestionRate > 0.5) {
+        changeTrams(veh, { congestionRate, color: "icon-yellow" });
+    } else {
+        changeTrams(veh, { congestionRate, color: "icon-green" });
+    }
+};
+
+const changeTrams = (veh, newObjec) => {
+    trams = trams.map(tram => (tram.veh === veh ? { ...tram, ...newObjec } : tram));
+};
 
 export default () => {
     const map = {
@@ -95,29 +133,12 @@ export default () => {
 
     useEffect(() => {
         setInterval(() => {
-            // console.log(trams);
             setTramsArray(trams);
         }, 1000);
+        setInterval(() => {
+            refreshCongestion();
+        }, 5000);
     }, []);
-    // useEffect(() => {
-    //     const url =
-    //         "https://hsl-tram-congestion.appspot.com/trips/HSL:1007_20190820_Ti_2_2101/congestionRate";
-    //     const fetchData = async () => {
-    //         const result = await fetch(url);
-    //         const data = await result.text();
-    //         const congestionRate = parseFloat(data);
-    //         console.log(congestionRate);
-
-    //         if (congestionRate > 1) {
-    //             setTramColor("icon-red");
-    //         } else if (congestionRate > 0.5) {
-    //             setTramColor("icon-yellow");
-    //         } else {
-    //             setTramColor("icon-green");
-    //         }
-    //     };
-    //     fetchData();
-    // }, []);
 
     return (
         <>
@@ -126,8 +147,8 @@ export default () => {
                 style={{ height: "80vh" }}
                 center={position}
                 zoom={map.zoom}
-                zoomControl={false}
-                scrollWheelZoom={false}
+                // zoomControl={false}
+                // scrollWheelZoom={false}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -140,10 +161,16 @@ export default () => {
                             key={tram.veh}
                             position={tramPosition}
                             icon={L.divIcon({
-                                className: `my-div-icon vh-${tram.veh} route desi-${tram.desi} `
+                                className: `${tram.color} my-div-icon vh-${tram.veh} route desi-${tram.desi} `
                             })}
                             opacity={0.8}
-                        ></Marker>
+                        >
+                            <Popup>
+                                {`Tram Number:${tram.veh}`}
+                                <br />
+                                {`Congestion Rate:${Math.round(tram.congestionRate * 100) / 100}`}
+                            </Popup>
+                        </Marker>
                     );
                 })}
             </Map>
