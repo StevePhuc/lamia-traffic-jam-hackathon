@@ -125,9 +125,9 @@ const changeTrams = (veh, newObjec) => {
 
 export default () => {
     const map = {
-        lat: 60.169282,
-        lng: 24.939191,
-        zoom: 14,
+        lat: 60.169744,
+        lng: 24.933468,
+        zoom: 15,
         number: 1
     };
 
