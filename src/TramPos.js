@@ -19,11 +19,14 @@ client.subscribe("/hfp/v2/journey/ongoing/vp/tram/+/+/1007/+/#", { qos: 1 }, fun
     }
 });
 
-async function getTripId(routeId, realtimeDirectionId, departureDate, departureTime) {
+async function getTripId(routeId, realtimeDirectionId, departureDate, departureTime, timestamp) {
     const routingDirectionId = realtimeDirectionId - 1;
 
+    const [,,departureDay] = departureDate.split('-');
+    const hasRolledOverToNextDay = new Date(timestamp).getDate() > departureDay;
+
     const [hours, minutes] = departureTime.split(':');
-    const departureSeconds = hours * 3600 + minutes * 60;
+    const departureSeconds = hours * 3600 + minutes * 60 + (hasRolledOverToNextDay ? 86400 : 0);
 
     const query = `
 {
@@ -59,7 +62,7 @@ function TramPos({ setTramPos }) {
             const data = JSON.parse(message);
             const {VP} = data;
 
-            const tripId = await getTripId(VP.route, VP.dir, VP.oday, VP.start);
+            const tripId = await getTripId(VP.route, VP.dir, VP.oday, VP.start, VP.tst);
             console.log(tripId)
 
             // const { lat, long } = data.VP;
