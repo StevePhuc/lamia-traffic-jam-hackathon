@@ -3,11 +3,14 @@ import { Map, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
 
 let request = require("request-promise-native");
-async function getTripId(routeId, realtimeDirectionId, departureDate, departureTime) {
+async function getTripId(routeId, realtimeDirectionId, departureDate, departureTime, timestamp) {
     const routingDirectionId = realtimeDirectionId - 1;
 
+    const [, , departureDay] = departureDate.split("-");
+    const hasRolledOverToNextDay = new Date(timestamp).getDate() > departureDay;
+
     const [hours, minutes] = departureTime.split(":");
-    const departureSeconds = hours * 3600 + minutes * 60;
+    const departureSeconds = hours * 3600 + minutes * 60 + (hasRolledOverToNextDay ? 86400 : 0);
 
     const query = `
         {
@@ -31,8 +34,11 @@ async function getTripId(routeId, realtimeDirectionId, departureDate, departureT
     );
 
     const trip = response.data.fuzzyTrip;
-    // console.log("response", response);
-    // console.log("trip", trip);
+    if (trip) {
+    } else {
+        console.log("response", response);
+        console.log("trip", trip);
+    }
 
     return trip ? trip.gtfsId : null;
 }
@@ -70,10 +76,10 @@ client.on("message", async function(topic, message) {
         const { VP } = data;
         // console.log("veh", veh, ": ", VP);
 
-        const tripId = await getTripId(VP.route, VP.dir, VP.oday, VP.start);
+        const tripId = await getTripId(VP.route, VP.dir, VP.oday, VP.start, VP.tst);
 
         if (tripId) {
-            console.log("veh", veh, ": ", "tripId", tripId);
+            // console.log("veh", veh, ": ", "tripId", tripId);
             trams = trams.map(tram => (tram.veh == veh ? { ...tram, tripId } : tram));
         } else {
             console.log("trip Null VP:", VP);
@@ -103,7 +109,7 @@ const checkCongestion = async (veh, tripId) => {
     const data = await result.text();
     const congestionRate = parseFloat(data);
     // console.log(veh, ": ", congestionRate);
-    if (congestionRate > 1) {
+    if (congestionRate > 1.5) {
         // setTramColor("icon-red");
         changeTrams(veh, { congestionRate, color: "icon-red" });
     } else if (congestionRate > 0.5) {
@@ -129,9 +135,9 @@ export default () => {
 
     const [tramsArray, setTramsArray] = useState([]);
 
-    const [tramColor, setTramColor] = useState("icon-green");
-
     useEffect(() => {
+        setTramsArray(trams);
+        refreshCongestion();
         setInterval(() => {
             setTramsArray(trams);
         }, 1000);

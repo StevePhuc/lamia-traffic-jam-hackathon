@@ -9,6 +9,13 @@
 .icon-yellow {
     background: rgb(236, 202, 8);
 }
+.undefined {
+    background: rgb(236, 235, 227);
+}
+
+.undefined::before {
+    color: black !important;
+}
 
 .my-div-icon {
     width: 25px !important;
@@ -40,6 +47,12 @@
 .desi-5::before {
     content: "5";
 }
+.desi-5H::before {
+    content: "5H";
+    padding-left: 3px;
+    padding-top: 3px;
+    font-size: 14px;
+}
 .desi-6::before {
     content: "6";
 }
@@ -48,8 +61,8 @@
 }
 .desi-7H::before {
     content: "7H";
-    padding-left: 1px;
-    font-size: 16px;
+    padding-left: 3px;
+    font-size: 14px;
 }
 .desi-8::before {
     content: "8";
@@ -59,8 +72,8 @@
 }
 .desi-10::before {
     content: "10";
-    padding-left: 1px;
-    font-size: 16px;
+    padding-left: 3px;
+    font-size: 14px;
 }
 .desi-10H::before {
     content: "10H";
